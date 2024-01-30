@@ -1,0 +1,116 @@
+base_model: microsoft/phi-2
+model_type: AutoModelForCausalLM
+tokenizer_type: AutoTokenizer
+is_llama_derived_model: false
+trust_remote_code: true
+
+load_in_8bit: false
+load_in_4bit: true
+strict: false
+
+#datasets:
+#  - path: /media/storage/datasets/math-pile
+#    type: completion
+    
+datasets:
+  - path: ssmi153/Capybara-ShareGPT
+    type: sharegpt
+    conversation: chatml
+
+  - path: ise-uiuc/Magicoder-Evol-Instruct-110K
+    type: gpteacher
+
+  - path: epfl-llm/guidelines
+    type: completion
+    field: clean_text
+
+  - path: philschmid/markdown-documentation-transformers
+    type: completion
+    field: markdown
+
+  - path: pile-of-law/pile-of-law
+    type: completion
+    name:
+      - un_debates
+      - doj_guidance_documents
+      - constitutions
+      - scotus_oral_arguments
+      - ftc_advisory_opinions
+      - cc_casebooks
+
+
+
+chat_template: chatml
+
+dataset_prepared_path:
+val_set_size: 0.0025
+output_dir: ./phi-llemma
+
+hf_use_auth_token: true
+ 
+sequence_len: 2048 #3000
+sample_packing: false  # not CURRENTLY compatible with LoRAs
+pad_to_sequence_len: true
+
+adapter: qlora
+lora_model_dir:
+lora_r: 64
+lora_alpha: 32
+lora_dropout: 0.05
+lora_target_linear: true
+lora_fan_in_fan_out:
+lora_modules_to_save:
+  - lm_head
+  - embed_tokens
+
+wandb_mode: online
+wandb_project: phi-llemma
+wandb_entity: syntrophy
+wandb_watch:
+wandb_name: phish-2
+wandb_log_model: phi-llemma-2
+wandb_run_id: 12012024
+wandb_log_model: 
+
+save_total_limit: 2
+gradient_accumulation_steps: 1
+micro_batch_size: 2
+num_epochs: 1
+optimizer: adamw_bnb_8bit
+adam_beta2: 0.9
+adam_epsilon: 0.00001
+max_grad_norm: 1.0
+lr_scheduler: cosine
+learning_rate: 0.00003
+
+train_on_inputs: false
+group_by_length: false
+bf16: true
+fp16: false
+tf32: false
+
+gradient_checkpointing: true
+early_stopping_patience:
+resume_from_checkpoint:
+local_rank:
+logging_steps: 50
+xformers_attention:
+flash_attention: true
+
+warmup_steps: 400
+evals_per_epoch: 40
+#saves_per_epoch: 1
+save_steps: 6000
+debug:
+deepspeed:
+weight_decay: 0.1
+fsdp:
+fsdp_config:
+resize_token_embeddings_to_32x: true
+special_tokens:
+  bos_token: "<|endoftext|>"
+  eos_token: "<|endoftext|>"
+  unk_token: "<|endoftext|>"
+  pad_token: "<|endoftext|>"
+
+seed: 42
